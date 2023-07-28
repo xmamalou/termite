@@ -41,8 +41,7 @@ extern "C" {
 * Errors are a 2-byte integer, laid out in hex as follows:
 *
 * The first digit (from the left) is the general category of the error. For example, 0x1XXX is a generic error, 0x2XXX is a GLFW error, etc.
-* The second digit is a more specified category of the error. For example, for Vulkan, there could be multiple errors concerning the instance, the device, the surface, etc.
-* The third and fourth digits are the error code number.
+* The second digit is a more specified category of the error.
 */
 #define TRM_GENERIC_OOM_ERROR -0x1001
 #define TRM_GENERIC_NO_SUCH_FILE_ERROR -0x1002
@@ -145,10 +144,9 @@ TrmBuffer trmAllocate(struct TrmBufferInfo* pBufferInfo, TrmMemoryPool hMemoryPo
 /*
 * @brief Reallocate memory from a pool for a buffer.
 *
-* @param size: The size of the buffer, in 4-byte words
 * @param hBuffer: The buffer to reallocate memory for.
 */
-void trmReallocate(uint64_t size, TrmBuffer hBuffer, TrmMemoryPool hMemoryPool);
+void trmReallocate(struct TrmBufferInfo* pBufferInfo, TrmBuffer hBuffer, TrmMemoryPool hMemoryPool);
 
 /*
 * @brief Free the memory of a buffer.
@@ -178,7 +176,7 @@ extern inline int trmMemoryPoolErrorGet(TrmMemoryPool hMemoryPool);
 
 /*
 * @brief Destroy a memory pool. Also frees the memory allocated for it.
-* BEWARE! If the memory pool has been expanded using a Vulkan device, you must destroy the pool BEFORE destroying the device.
+* BEWARE! If the memory pool has been created or expanded using a Vulkan device, you must destroy the pool BEFORE destroying the device.
 * Doing otherwise WILL result in a crash.
 *
 * @param hMemoryPool: The memory pool to destroy.

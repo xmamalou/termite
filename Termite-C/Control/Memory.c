@@ -74,7 +74,7 @@ static int _dflBlockReserveMemory(struct TrmMemoryPoolInfo* pInfo, struct TrmMem
                 // copy the data from the following 4-byte buffer to the buffer that is on the 
                 // device's memory when the user attempts to put data in some allocated memory.
                 // Since the buffer's size will be known at allocation time, both it and the 
-                // command buffer will be created at `dflAllocate`.
+                // command buffer will be created at `trmAllocate`.
                 pMemoryBlock->miniBuff = calloc(1, sizeof(int));
                 break;
             }
@@ -211,8 +211,8 @@ void trmMemoryPoolExpand(struct TrmMemoryPoolInfo* pInfo, TrmMemoryPool hMemoryP
 
 TrmBuffer trmAllocate(struct TrmBufferInfo* pBufferInfo, TrmMemoryPool hMemoryPool)
 {
-    // allocation happens this way: Dragonfly checks if a memory block has available space. If it has,
-    // then it will start filling chunks, up to DFL_MAX_ITEM_COUNT. Each chunk's size depends on how big
+    // allocation happens this way: Termite checks if a memory block has available space. If it has,
+    // then it will start filling chunks, up to TRM_MAX_ITEM_COUNT. Each chunk's size depends on how big
     // the slots of available memory in each block of the memory pool are.
     if (TRM_MEMORY_POOL->used >= TRM_MEMORY_POOL->size)
     {
