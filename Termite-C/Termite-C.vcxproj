@@ -137,6 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Control\Thread.c" />
     <ClCompile Include="Main.c" />
     <ClCompile Include="Control\Memory.c" />
   </ItemGroup>

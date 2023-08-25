@@ -3,7 +3,6 @@
 * WHEN TERMITE REACHES A DESIRED WORKING STATE, THIS FILE WILL BE DELETED!
 * WHEN THAT HAPPENS, TERMITE WILL BE SET TO COMPILE AS A DYNAMIC LIBRARY!
 */
-
 #include <stdio.h>
 #include <stdint.h>
 
@@ -22,19 +21,31 @@
 
 #include "Termite.h"
 
+void trmTest(void* pParams)
+{
+    printf("Hello, World!");
+    for(int i = 0; i < 100; i++)
+    {
+        printf("I love threads!\n");
+    }
+}
+
 int main()
 {
-    TrmMemoryPool memPool = NULL;
-    TrmBuffer     buffer  = NULL;
+    TrmThreadProcess proc = &trmTest;
 
-    struct TrmMemoryPoolInfo memPoolInfo = {
-        .size = 1024,
-        .device = NULL,
+    struct TrmThreadInfo info = {
+        .paramSize = 0,
+        .pProc = proc
     };
 
-    memPool = trmMemoryPoolCreate(&memPoolInfo);
-    if (trmMemoryPoolErrorGet(memPool) < TRM_SUCCESS)
-        return 1;
+    TrmThread thread = trmThreadCreate(&info);
+    if(trmThreadErrorGet(thread) < 0)
+    {
+        printf("Error: %d", trmThreadErrorGet(thread));
+    }
 
-    printf("MEMORY SIZE: %d\nMEMORY BLOCKS: %d", trmMemoryPoolSizeGet(memPool), trmMemoryPoolBlockCountGet(memPool));
+    trmThreadWait(thread);
+
+    return 0;
 }

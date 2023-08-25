@@ -24,6 +24,9 @@
     <ClCompile Include="Control\Memory.c">
       <Filter>Source Files\Control</Filter>
     </ClCompile>
+    <ClCompile Include="Control\Thread.c">
+      <Filter>Source Files\Control</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Termite.h">
