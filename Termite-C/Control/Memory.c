@@ -21,8 +21,8 @@
  *       INTERNAL       *
  * -------------------- */
 
-static int _dflBlockReserveMemory(struct TrmMemoryPoolInfo* pInfo, struct TrmMemoryBlock_T* pMemoryBlock);
-static int _dflBlockReserveMemory(struct TrmMemoryPoolInfo* pInfo, struct TrmMemoryBlock_T* pMemoryBlock)
+static int _trmBlockReserveMemory(struct TrmMemoryPoolInfo* pInfo, struct TrmMemoryBlock_T* pMemoryBlock);
+static int _trmBlockReserveMemory(struct TrmMemoryPoolInfo* pInfo, struct TrmMemoryBlock_T* pMemoryBlock)
 {
     if (pInfo->device == NULL)
         pMemoryBlock->startingAddress = calloc(pMemoryBlock->size, sizeof(char)); // chars are 1 byte long. I think having the memory initialized as zeroes is a good idea.
@@ -93,8 +93,8 @@ static int _dflBlockReserveMemory(struct TrmMemoryPoolInfo* pInfo, struct TrmMem
     return TRM_SUCCESS;
 }
 
-int _dflBufferChunkCreateCommandBuff(struct TrmBufferInfo* pInfo, struct TrmBufferChunk_T* pChunk);
-int _dflBufferChunkCreateCommandBuff(struct TrmBufferInfo* pInfo, struct TrmBufferChunk_T* pChunk)
+int _trmBufferChunkCreateCommandBuff(struct TrmBufferInfo* pInfo, struct TrmBufferChunk_T* pChunk);
+int _trmBufferChunkCreateCommandBuff(struct TrmBufferInfo* pInfo, struct TrmBufferChunk_T* pChunk)
 {
     VkCommandBufferAllocateInfo commInfo = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
@@ -165,7 +165,7 @@ TrmMemoryPool trmMemoryPoolCreate(struct TrmMemoryPoolInfo* pInfo)
     for (int i = 1; i < TRM_MAX_ITEM_COUNT; i++)
         block->slots[2 * i] = 1; // slots[2*i + 1] = 0, which means that the slot is marked as used.
 
-    memoryPool->error = _dflBlockReserveMemory(pInfo, block);
+    memoryPool->error = _trmBlockReserveMemory(pInfo, block);
 
     memoryPool->firstBlock = block;
 
@@ -204,7 +204,7 @@ void trmMemoryPoolExpand(struct TrmMemoryPoolInfo* pInfo, TrmMemoryPool hMemoryP
     for (int i = 1; i < TRM_MAX_ITEM_COUNT; i++)
         block->slots[2 * i] = 1; // slots[2*i + 1] = 0, which means that the slot is marked as used.
 
-    TRM_MEMORY_POOL->error = _dflBlockReserveMemory(pInfo, newBlock);
+    TRM_MEMORY_POOL->error = _trmBlockReserveMemory(pInfo, newBlock);
 
     block->next = newBlock;
 }
@@ -268,7 +268,7 @@ TrmBuffer trmAllocate(struct TrmBufferInfo* pBufferInfo, TrmMemoryPool hMemoryPo
                 };
                 vkCreateEvent(block->hDevice, &eventInfo, NULL, &buffer->chunks[i].hostCanGetNextPart);
 
-                TRM_MEMORY_POOL->error = _dflBufferChunkCreateCommandBuff(&buffer->chunks[i], block->hDevice);
+                TRM_MEMORY_POOL->error = _trmBufferChunkCreateCommandBuff(&buffer->chunks[i], block->hDevice);
             }
 
             block->slots[2 * bestSlot] += buffer->chunks[i].size;
