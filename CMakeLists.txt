@@ -1,4 +1,4 @@
-# FILEPATH: ${DRAGONFLY_ROOT}/CMakeLists.txt
+# FILEPATH: ${TERMITE_ROOT}/CMakeLists.txt
 cmake_minimum_required(VERSION 3.10)
 set(CMAKE_C_COMPILER "/usr/bin/clang")
 set(CMAKE_GENERATOR "Ninja" CACHE INTERNAL "" FORCE)
@@ -25,7 +25,7 @@ set(SOURCES
     Termite-C/Control/Memory.c
 )
 
-# this is only temporary, when in a finished state, Dragonfly will be a (dynamically linked) library
+# this is only temporary, when in a finished state, Termite will be a (dynamically linked) library
 add_executable(termite ${SOURCES})
 
 target_link_libraries(termite
