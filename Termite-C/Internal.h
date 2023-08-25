@@ -24,6 +24,13 @@
 #define TRM_MEMORY_POOL TRM_HANDLE(MemoryPool)
 #define TRM_BUFFER      TRM_HANDLE(Buffer)
 
+#ifdef _WIN32
+    #include <Windows.h>
+#else 
+    #include <pthread.h>
+    #include <signal.h>
+#endif
+
 /* ================================ *
  *             MEMORY               *
  * ================================ */
@@ -78,6 +85,24 @@ struct TrmBuffer_T
     struct TrmBufferChunk_T chunks[TRM_MAX_ITEM_COUNT];
 
     // DflBuffers won't have an error field, the memory pool will have buffer related errors reported in its error field instead.
+};
+
+/* ================================ *
+ *            THREADS               *
+ * ================================ */
+
+struct TrmThread_T
+{
+   struct TrmThreadInfo info;
+   
+#ifdef _WIN32
+   HANDLE hThread;
+#else
+   pthread_t hThread;
+   int       id;
+#endif
+
+   int error;
 };
 
 #endif

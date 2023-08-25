@@ -24,7 +24,9 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <vulkan/vulkan.h>
+#ifndef TRM_NO_VULKAN
+    #include <vulkan/vulkan.h>
+#endif
 
 #define TRM_VERSION(major, minor, patch) (((unsigned int)major << 16) | ((unsigned int)minor << 8) | (unsigned int)patch)
 
@@ -48,13 +50,15 @@ extern "C" {
 #define TRM_GENERIC_OUT_OF_BOUNDS_ERROR -0x1003 // attempted to create more items than the maximum allowed
 #define TRM_GENERIC_ALREADY_INITIALIZED_ERROR -0x1004 // the item is already initialized
 
-#define TRM_MEMORY_UNAVAILABLE_BLOCKS_ERROR -0x2101 // no more memory blocks available
-#define TRM_MEMORY_OOM_ERROR -0x2102 // no more memory available from pool
+#define TRM_MEMORY_UNAVAILABLE_BLOCKS_ERROR -0x2001 // no more memory blocks available
+#define TRM_MEMORY_OOM_ERROR -0x2002 // no more memory available from pool
 
-#define TRM_VULKAN_DEVICE_NO_MEMORY_ERROR -0x3201 // vulkan device has no memory available for allocation
-#define TRM_VULKAN_DEVICE_UNMAPPABLE_MEMORY_ERROR -0x3201 // vulkan device couldn't map memory to host.
-#define TRM_VULKAN_DEVICE_BUFFER_CREATION_ERROR -0x3201 // vulkan device couldn't create buffer
-#define TRM_VULKAN_DEVICE_COMMAND_CREATION_ERROR -0x3201 // vulkan device couldn't create command buffer
+#define TRM_VULKAN_DEVICE_NO_MEMORY_ERROR -0x3001 // vulkan device has no memory available for allocation
+#define TRM_VULKAN_DEVICE_UNMAPPABLE_MEMORY_ERROR -0x3001 // vulkan device couldn't map memory to host.
+#define TRM_VULKAN_DEVICE_BUFFER_CREATION_ERROR -0x3001 // vulkan device couldn't create buffer
+#define TRM_VULKAN_DEVICE_COMMAND_CREATION_ERROR -0x3001 // vulkan device couldn't create command buffer
+
+#define TRM_THREAD_COULDNT_CREATE_ERROR -0x4001 // couldn't create thread
 
 
 // other definitions
@@ -79,41 +83,51 @@ TRM_MAKE_HANDLE(TrmBuffer);
   *   TYPES              *
   * -------------------- */
 
+#ifndef TRM_NO_VULKAN
 struct TrmVkDeviceMemInfo
 {
     VkDeviceSize size; // size of memory, in bytes
     uint32_t     memoryHeapIndex; // the index of the heap the memory belongs to
     bool         isHostVisible; // is the memory visible to the host? 
 };
+#endif
 
 struct TrmMemoryPoolInfo
 {
     uint64_t size; // size of pool, in 4-byte words
 
+#ifndef TRM_NO_VULKAN
     VkDevice device; // set to point to a Vulkan device if the memory pool should be allocated from the device
     bool useShared; // set to true if the memory pool shouldn't be local to the device
+
 
     uint32_t                   localHeapCount; // how many local heaps there are
     struct TrmVkDeviceMemInfo* pLocalHeaps; // the local heaps
 
     uint32_t                   sharedHeapCount; // how many shared heaps there are
     struct TrmVkDeviceMemInfo* pSharedHeaps; // the shared heaps
+#endif
 };
 
 struct TrmQueueInfo
 {
     uint32_t queueFamilyIndex;
     uint32_t queueCount;
+#ifndef TRM_NO_VULKAN
     VkQueue* pQueues;
+#endif
 };
+
 
 struct TrmBufferInfo
 {
     uint64_t size; // size of buffer, in 4-byte words
 
+#ifndef TRM_NO_VULKAN
     VkDevice             device;
     VkCommandPool        commandPool;
     struct TrmQueueInfo* pQueuesInfo;
+#endif
 };
 
 /* -------------------- *
@@ -182,6 +196,61 @@ extern inline int trmMemoryPoolErrorGet(TrmMemoryPool hMemoryPool);
 * @param hMemoryPool: The memory pool to destroy.
 */
 void trmMemoryPoolDestroy(TrmMemoryPool hMemoryPool);
+
+/* ================================ *
+ *            THREADS               *
+ * ================================ */
+
+/* -------------------- *
+ *      TYPES           *
+ * -------------------- */
+
+typedef void (*TrmThreadProcess)(void*); // a function that can be executed in a thread)
+
+struct TrmThreadInfo
+{
+    uint32_t         paramSize; // size of the (void*) parameter in bytes
+    void*            pParam; // parameter to pass to the thread
+
+    uint32_t         stackSize; // size of the stack in bytes
+
+    TrmThreadProcess pProc; // function to execute in the thread
+};
+
+TRM_MAKE_HANDLE(TrmThread);
+
+/* -------------------- *
+ *   INITIALIZE         *
+ * -------------------- */
+
+/*
+* @brief Create a thread.
+* 
+*/
+TrmThread trmThreadCreate(struct TrmThreadInfo* pInfo);
+
+/* -------------------- *
+ *   CHANGE             *
+ * -------------------- */
+
+/*
+* @brief Wait for a thread to finish.
+*/
+extern inline void trmThreadWait(TrmThread hThread);
+
+/* -------------------- *
+ *   GET & SET          *
+ * -------------------- */
+
+/*
+* @brief Get whether a thread is running or not.
+*/
+extern inline bool trmThreadIsRunning(TrmThread hThread);
+
+/*
+* @brief Get the error code of a thread.
+*/
+extern inline int trmThreadErrorGet(TrmThread hThread);
 
 #ifdef __cplusplus
 }
